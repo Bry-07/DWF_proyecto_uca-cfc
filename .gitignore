@@ -1,0 +1,37 @@
+# ---- Java / Maven ----
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+*.class
+*.jar
+*.war
+
+# ---- Spring Boot ----
+backend/target/
+backend/.mvn/
+backend/logs/
+application-local.properties
+application-local.yml
+*.log
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+*.iws
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Variables de entorno / secretos ----
+.env
+*.env.local
+
+# ---- Node (si se usa para docs o algún frontend auxiliar) ----
+node_modules/
+dist/
