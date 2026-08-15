@@ -1,0 +1,7 @@
+# Dueños por defecto: toda propuesta requiere revisión del owner principal
+* @Bry-07
+
+# Reglas por área
+.github/ @Bry-07
+backend/ @Bry-07
+docs/ @Bry-07
