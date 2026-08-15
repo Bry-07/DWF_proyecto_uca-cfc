@@ -26,6 +26,7 @@ DWF_proyecto_uca-cfc/
 │   │   └── base-datos/       # Modelo relacional
 │   ├── endpoints/            # Definición de endpoints REST por módulo
 │   └── mockups/              # Mockups .SVG/Figma de las pantallas principales
+│   └── documentacion/        # Archivos y documentos .pdf/.docx
 ├── .github/
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── .gitignore
