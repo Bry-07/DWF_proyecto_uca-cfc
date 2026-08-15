@@ -60,5 +60,6 @@ Cada integrante trabaja en su rama `feature/...` y abre un **Pull Request hacia 
 Para mantener un estándar más cercano a entorno empresarial (restricciones, revisiones obligatorias y validaciones automáticas), revisar y aplicar:
 
 - `docs/gobernanza-repositorio.md`
+- `docs/flujo-trabajo-develop-hotfix.md`
 - `.github/workflows/policy-checks.yml`
 - `.github/CODEOWNERS`
