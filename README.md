@@ -54,3 +54,12 @@ DWF_proyecto_uca-cfc/
 - `feature/<modulo>-<nombre>` — una rama por funcionalidad y por integrante, ej. `feature/inscripciones-bryan`.
 
 Cada integrante trabaja en su rama `feature/...` y abre un **Pull Request hacia `develop`**. Ningún PR se mergea sin al menos una revisión de otro integrante del equipo.
+
+## Gobernanza y reglas del repositorio
+
+Para mantener un estándar más cercano a entorno empresarial (restricciones, revisiones obligatorias y validaciones automáticas), revisar y aplicar:
+
+- `docs/gobernanza-repositorio.md`
+- `docs/flujo-trabajo-develop-hotfix.md`
+- `.github/workflows/policy-checks.yml`
+- `.github/CODEOWNERS`
