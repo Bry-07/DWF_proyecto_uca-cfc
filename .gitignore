@@ -9,7 +9,6 @@ target/
 
 # ---- Spring Boot ----
 backend/target/
-backend/.mvn/
 backend/logs/
 application-local.properties
 application-local.yml

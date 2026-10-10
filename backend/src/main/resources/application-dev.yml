@@ -1,0 +1,10 @@
+# Perfil de desarrollo: más detalle en el log y SQL visible
+spring:
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    com.uca.cfc: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.flywaydb: INFO
