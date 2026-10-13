@@ -243,7 +243,7 @@ src/main/java/com/uca/cfc/
 ├── config/        Configuración: OpenAPI, auditoría JPA, reloj inyectable, BCrypt
 ├── controller/    16 controladores REST bajo /api/v1
 ├── dto/           51 records de petición y respuesta, agrupados por módulo
-├── entity/        24 entidades JPA + 17 enums de dominio
+├── entity/        21 entidades JPA y 3 clases base + 17 enums de dominio
 ├── exception/     Excepciones de negocio y @RestControllerAdvice global
 ├── mapper/        10 componentes de conversión entidad ↔ DTO
 ├── repository/    19 repositorios Spring Data con consultas JPQL
