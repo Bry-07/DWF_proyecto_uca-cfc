@@ -1,0 +1,15 @@
+# Perfil de pruebas: base de datos separada, sin datos de demostración
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/uca_cfc_connect_test}
+    username: ${DATABASE_USERNAME:cfc_app}
+    password: ${DATABASE_PASSWORD:cfc_app_dev}
+
+  flyway:
+    # Solo el esquema: las pruebas construyen sus propios datos
+    locations: classpath:db/migration
+    clean-disabled: false
+
+logging:
+  level:
+    com.uca.cfc: DEBUG
