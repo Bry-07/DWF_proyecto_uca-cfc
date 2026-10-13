@@ -4,7 +4,8 @@ Plataforma empresarial del **Centro de Formación Continua (CFC)** de la Univers
 API REST construida con Spring Boot 4 y PostgreSQL que centraliza la gestión académica, comercial y
 administrativa del centro.
 
-> **Cátedra:** Desarrollo de Software Empresarial · Universidad Don Bosco
+> **Cátedra:** Desarrollo de Aplicaciones con Web Frameworks (DWF404) · Universidad Don Bosco
+> **Docente:** Ing. Yesenia Escobar
 > **Fase 2 — Primer avance:** base de datos, CRUD completos, persistencia, validaciones, manejo de
 > excepciones y documentación Swagger.
 > **Entrega:** 25 de septiembre de 2026
@@ -164,6 +165,8 @@ conjunto completo.
 | `SERVER_PORT` | `8080` |
 
 ## 8. Ejecución
+
+Todos los comandos se ejecutan desde la carpeta `backend/`.
 
 **Windows (PowerShell):**
 
@@ -434,17 +437,11 @@ correrse sobre la base recién creada por Flyway, porque algunos casos crean y e
 
 | Integrante | Carné | Responsabilidad en la Fase 2 |
 |------------|-------|------------------------------|
-| Dominic Alejandro Castillo González | CG251726 | _(por completar)_ |
-| _(por completar)_ | | |
-| _(por completar)_ | | |
-| _(por completar)_ | | |
-| _(por completar)_ | | |
-
-> Módulos disponibles para repartir: Gestión Académica (cursos, diplomados, categorías,
-> modalidades, docentes) · Clientes e Inscripciones · Cotizaciones · Espacios y Alquileres ·
-> Catering y Agenda · Pagos y Comprobantes · Seguridad (usuarios y roles) · Base de datos y
-> migraciones · Manejo de excepciones y validaciones · Documentación y evidencias.
-
+| Concepción Getsemaní Miranda Cuéllar | MC250288 | Documentación (README) y evidencias de prueba |
+| Dania Merari Urias Viscarra | UV253195 | Capa de dominio y datos: entidades, repositorios, servicios y pruebas unitarias |
+| David Ezequiel Alvarado Alvarado | AA250233 | Base de datos: migraciones Flyway y script completo del esquema |
+| Dominic Alejandro Castillo Gonzales | CG251726 | Capa web: controladores, DTO, mappers, manejo de excepciones, configuración y utilidades |
+| Bryan Ernesto Anaya Brizuela | AB250136 | Configuración del proyecto (`pom.xml`, Maven wrapper, `application.yml`) y estructura del repositorio |
 ## 18. Estado del proyecto y próximos pasos
 
 ### Entregado en esta fase
