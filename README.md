@@ -1,73 +1,500 @@
-# UCA·CFC Connect
+# UCA-CFC Connect
 
-Sistema web empresarial para automatizar los procesos académicos y administrativos del **Centro de Formación Continua (CFC) de la UCA**: cursos y diplomados, inscripciones, cotizaciones, alquiler de espacios, catering, agenda institucional y pagos.
+API REST para digitalizar la operación del Centro de Formación Continua (CFC):
+cursos, diplomados, inscripciones, clientes, cotizaciones, alquileres,
+catering, agenda y pagos.
 
-Proyecto de cátedra — **Desarrollo de Aplicaciones con Web Frameworks (DWF404)**, Escuela de Computación, Facultad de Ingeniería, Universidad Don Bosco. Año 2026.
+Este repositorio contiene el backend estable y la documentación base para que el
+frontend React + Vite se construya contra un contrato verificable. La carpeta
+`frontend/` todavía no contiene una implementación funcional.
 
 ## Tecnologías
 
-Java 21 · Spring Boot 4 · Spring Data JPA · PostgreSQL 16 · Flyway · Swagger (springdoc-openapi) · Maven (wrapper incluido).
+- Java 21.
+- Spring Boot 4.0.6.
+- Spring Web MVC.
+- Spring Data JPA y Hibernate.
+- Jakarta Bean Validation.
+- Spring Security 7 y JWT con Nimbus.
+- PostgreSQL 16.
+- Flyway.
+- Springdoc OpenAPI / Swagger UI.
+- Maven Wrapper.
+- JUnit 5, Mockito y AssertJ.
+- Docker Compose para PostgreSQL.
 
-## Inicio rápido
+La rúbrica menciona `javax.validation`; en Spring Boot 4 el namespace correcto
+es `jakarta.validation`. El comportamiento de validación requerido es el mismo,
+pero no se debe mezclar `javax` con las dependencias Jakarta del proyecto.
 
-Todo el código vive en `backend/`. La guía completa (base de datos, variables de entorno, ejecución, Swagger, credenciales de prueba, reglas de negocio y pruebas) está en [`backend/README.md`](backend/README.md).
+## Estructura
 
-```bash
-cd backend
-./mvnw spring-boot:run        # Windows: .\mvnw.cmd spring-boot:run
+```text
+.
+├── backend/uca-cfc-connect/
+│   ├── src/main/java/com/uca/cfc/
+│   │   ├── config/
+│   │   ├── controller/
+│   │   ├── dto/
+│   │   ├── entity/
+│   │   ├── exception/
+│   │   ├── mapper/
+│   │   ├── repository/
+│   │   ├── security/
+│   │   ├── service/
+│   │   └── util/
+│   ├── src/main/resources/db/migration/
+│   ├── src/test/java/com/uca/cfc/
+│   ├── db/esquema_completo.sql
+│   ├── evidencias/
+│   ├── compose.yaml
+│   ├── pom.xml
+│   └── README.md
+├── docs/
+├── frontend/
+└── .github/
 ```
 
-Swagger UI: <http://localhost:8080/swagger-ui.html>
+## Ejecutar el backend
 
-## Equipo
+Requisitos: JDK 21, Docker Desktop y Git.
 
-| Integrante | Carné | Rol / módulo a cargo (Fase 1) |
+```powershell
+cd backend\uca-cfc-connect
+docker compose up -d
+.\mvnw.cmd clean test
+.\mvnw.cmd spring-boot:run
+```
+
+La API estará disponible en `http://localhost:8080`.
+
+URLs principales:
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+Flyway ejecuta automáticamente:
+
+- [V1__esquema_inicial.sql](backend/uca-cfc-connect/src/main/resources/db/migration/V1__esquema_inicial.sql):
+  esquema, claves, restricciones e índices.
+- [V2__datos_iniciales.sql](backend/uca-cfc-connect/src/main/resources/db/migration/V2__datos_iniciales.sql):
+  datos de demostración.
+- [V3__seguridad_jwt.sql](backend/uca-cfc-connect/src/main/resources/db/migration/V3__seguridad_jwt.sql):
+  revocación y recuperación de contraseña.
+- [V4__cotizacion_estado_en_proceso.sql](backend/uca-cfc-connect/src/main/resources/db/migration/V4__cotizacion_estado_en_proceso.sql):
+  estados de cotización.
+
+## Usuarios de desarrollo
+
+| Rol | Correo | Contraseña |
 |---|---|---|
-| Concepción Getsemaní Miranda Cuéllar | MC250288 | Contexto del proyecto, documento final, plan de trabajo |
-| Dania Merari Urias Viscarra | UV253195 | Modelo de dominio (diagrama de clases) |
-| David Ezequiel Alvarado Alvarado | AA250233 | Modelo de base de datos (diagrama relacional) |
-| Dominic Alejandro Castillo Gonzales | CG251726 | Definición de endpoints REST |
-| Bryan Ernesto Anaya Brizuela | AB250136 | Mockups, flujos de proceso, estructura del repositorio |
+| ADMIN | `admin@cfc.uca.edu.sv` | `Admin#2026.Cfc` |
+| RECEPCIONISTA | `recepcion@cfc.uca.edu.sv` | `Recepcion#2026.Cfc` |
+| CONTABILIDAD | `contabilidad@cfc.uca.edu.sv` | `Conta#2026.Cfc` |
+| CLIENTE | `marta.gomez@vitalab.com.sv` | `Cliente#2026.Cfc` |
 
-**Docente:** Ing. Yesenia Escobar
+Son credenciales únicamente para desarrollo y demostración. No deben utilizarse
+en producción.
 
-Las responsabilidades de la Fase 2 (implementación) están en la sección 17 de [`backend/README.md`](backend/README.md).
+## API y frontend
 
-## Módulos del sistema
+El frontend React + Vite debe definir:
 
-1. Gestión académica (cursos, diplomados)
-2. Gestión de clientes
-3. Inscripciones
-4. Cotizaciones
-5. Alquiler de espacios
-6. Catering
-7. Agenda institucional
-8. Pagos
-9. Seguridad (usuarios y roles; JWT en la Fase 3)
+```env
+VITE_API_URL=http://localhost:8080/api/v1
+```
 
-## Estructura del repositorio
+Las rutas protegidas requieren:
 
+```http
+Authorization: Bearer <accessToken>
+```
 
-## Flujo de trabajo en Git
+Flujo:
 
-- `main` — rama protegida, siempre desplegable, refleja lo entregado en cada fase. Solo recibe PR desde `develop` o `hotfix/*`.
-- `develop` — rama de integración, donde se juntan los módulos antes de pasar a `main`.
-- `feature/<modulo>-<nombre>` — una rama por funcionalidad y por integrante, ej. `feature/inscripciones-bryan`. También se aceptan `fix/*`, `chore/*`, `docs/*` y `hotfix/*`.
+1. `POST /auth/login` devuelve `accessToken` y `refreshToken`.
+2. El frontend guarda ambos tokens sin guardar la contraseña.
+3. El `accessToken` se envía en las solicitudes protegidas.
+4. `POST /auth/refresh` rota ambos tokens; se deben reemplazar los dos.
+5. `POST /auth/logout` invalida la sesión; se deben eliminar ambos tokens.
+6. Ante `401`, se intenta una sola renovación; ante `403`, se muestra falta de
+   permisos y no se repite automáticamente la solicitud.
 
-Cada integrante trabaja en su rama y abre un **Pull Request hacia `develop`**, usando la plantilla del repositorio. Ningún PR se fusiona sin al menos una revisión aprobada.
+Recursos disponibles bajo `/api/v1`:
 
-**Título del PR:** debe seguir Conventional Commits, por ejemplo `feat(inscripciones): agrega validación de cupos`. El check automático lo rechaza si no cumple.
+`auth`, `usuarios`, `roles`, `cursos`, `diplomados`, `categorias`,
+`modalidades`, `docentes`, `clientes`, `inscripciones`, `cotizaciones`,
+`espacios`, `alquileres`, `servicios-catering`, `solicitudes-catering`,
+`agenda` y `pagos`.
 
-Guía paso a paso: [`docs/flujo-trabajo-develop-hotfix.md`](docs/flujo-trabajo-develop-hotfix.md).
+Los nombres exactos de campos y respuestas deben consultarse en OpenAPI. Las
+listas usan, según el recurso, parámetros como:
 
-## Gobernanza y reglas del repositorio
+```text
+?page=0&size=10&sort=nombre,asc
+```
 
-- [`docs/gobernanza-repositorio.md`](docs/gobernanza-repositorio.md) — protección de ramas y estándar de PR
-- [`docs/flujo-trabajo-develop-hotfix.md`](docs/flujo-trabajo-develop-hotfix.md) — flujo de trabajo para `develop` y `hotfix`
-- [`.github/workflows/policy-checks.yml`](.github/workflows/policy-checks.yml) — validaciones automáticas
-- [`.github/CODEOWNERS`](.github/CODEOWNERS) — responsables de revisión
+La página comienza en cero. La interfaz debe contemplar estados de carga, lista
+vacía, error, paginación y los estados HTTP `400`, `401`, `403`, `404`, `409` y
+`422`.
 
-## Enlaces
+## Cumplimiento de la rúbrica
 
-- Prototipo y recursos de diseño en Figma: ver [`docs/mockups/Enlaces.txt`](docs/mockups/Enlaces.txt)
-- Documento de la Fase 1: [`docs/documentacion/`](docs/documentacion/)
+Cada criterio se relaciona con una evidencia concreta del backend. Los
+fragmentos son representativos; el archivo enlazado contiene la implementación
+completa.
+
+### 1. Arquitectura MVC
+
+**Estado: Cumplido.**
+
+Rutas:
+
+- [Controllers](backend/uca-cfc-connect/src/main/java/com/uca/cfc/controller)
+- [Services](backend/uca-cfc-connect/src/main/java/com/uca/cfc/service)
+- [Repositories](backend/uca-cfc-connect/src/main/java/com/uca/cfc/repository)
+
+Fragmentos:
+
+```java
+@RequestMapping("/api/v1/cursos")
+public class CursoController {
+    private final CursoService servicio;
+}
+```
+
+```java
+@Service
+public class CursoService {
+    private final CursoRepository repositorio;
+}
+```
+
+```java
+public interface CursoRepository extends JpaRepository<Curso, Long> {
+}
+```
+
+Archivos:
+
+- [CursoController.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/controller/CursoController.java)
+- [CursoService.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/service/CursoService.java)
+- [CursoRepository.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/repository/CursoRepository.java)
+
+### 2. Persistencia con Spring Data JPA e Hibernate
+
+**Estado: Cumplido.**
+
+Fragmentos:
+
+```java
+@Entity
+@Table(name = "cursos")
+public class Curso {
+}
+```
+
+```java
+public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+}
+```
+
+Dependencias y configuración:
+
+- [pom.xml](backend/uca-cfc-connect/pom.xml)
+- [application.yml](backend/uca-cfc-connect/src/main/resources/application.yml)
+- [entidades](backend/uca-cfc-connect/src/main/java/com/uca/cfc/entity)
+
+### 3. Validaciones
+
+**Estado: Cumplido con Jakarta Bean Validation.**
+
+Fragmento:
+
+```java
+public record LoginRequest(
+    @NotBlank @Email String email,
+    @NotBlank String password
+) {
+}
+```
+
+Archivo:
+
+- [LoginRequest.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/dto/auth/LoginRequest.java)
+
+Los controladores reciben los DTO con `@Valid`, por ejemplo en
+[AgendaController.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/controller/AgendaController.java).
+
+### 4. Manejo de errores con `@ControllerAdvice`
+
+**Estado: Cumplido.**
+
+Fragmento:
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+}
+```
+
+Archivo:
+
+- [GlobalExceptionHandler.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/exception/GlobalExceptionHandler.java)
+- [ErrorResponse.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/exception/ErrorResponse.java)
+
+### 5. Servicios REST CRUD y búsquedas personalizadas
+
+**Estado: Cumplido en los módulos implementados.**
+
+Fragmento:
+
+```java
+@GetMapping
+public PageResponse<CursoResponse> listar(Pageable pageable) {
+    return servicio.listar(pageable);
+}
+```
+
+Archivo de ejemplo:
+
+- [CursoController.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/controller/CursoController.java)
+- [CursoService.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/service/CursoService.java)
+- [CursoRepository.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/repository/CursoRepository.java)
+
+La lista de endpoints real y actualizada se obtiene desde
+`http://localhost:8080/v3/api-docs`.
+
+### 6. Documentación Swagger/OpenAPI
+
+**Estado: Cumplido.**
+
+Fragmento:
+
+```java
+@Bean
+public OpenAPI api() {
+    return new OpenAPI()
+        .components(new Components().addSecuritySchemes("bearerAuth", ...));
+}
+```
+
+Archivo:
+
+- [OpenApiConfig.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/config/OpenApiConfig.java)
+
+También se declara el esquema `ErrorResponse` para evitar referencias OpenAPI
+incompletas.
+
+### 7. Spring Security y JWT
+
+**Estado: Cumplido.**
+
+Fragmentos:
+
+```java
+http.oauth2ResourceServer(oauth -> oauth
+    .jwt(jwt -> jwt.jwtAuthenticationConverter(convertidor)));
+```
+
+```java
+@Bean
+public JwtDecoder jwtDecoder(TokenRevocadoRepository repositorio) {
+    return NimbusJwtDecoder.withSecretKey(clave()).build();
+}
+```
+
+Archivo:
+
+- [SecurityConfig.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/security/SecurityConfig.java)
+- [JwtService.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/security/JwtService.java)
+- [AuthService.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/service/AuthService.java)
+
+### 8. Control de acceso por roles
+
+**Estado: Cumplido.**
+
+Fragmento:
+
+```java
+rutas.requestMatchers(BASE + "/usuarios/**", BASE + "/roles/**")
+     .hasRole(ADMIN);
+```
+
+Los roles implementados son `ADMIN`, `RECEPCIONISTA`, `CLIENTE` y
+`CONTABILIDAD`. Además del filtro global, los servicios aplican aislamiento de
+recursos por cliente.
+
+Archivo:
+
+- [SecurityConfig.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/security/SecurityConfig.java)
+- [UsuarioActual.java](backend/uca-cfc-connect/src/main/java/com/uca/cfc/security/UsuarioActual.java)
+
+### 9. Pruebas unitarias
+
+**Estado: Cumplido.**
+
+Comando:
+
+```powershell
+cd backend\uca-cfc-connect
+.\mvnw.cmd -q clean test
+```
+
+Pruebas:
+
+- [AuthServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/service/AuthServiceTest.java)
+- [JwtServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/security/JwtServiceTest.java)
+- [CotizacionServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/service/CotizacionServiceTest.java)
+- [AlquilerServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/service/AlquilerServiceTest.java)
+- [InscripcionServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/service/InscripcionServiceTest.java)
+- [PagoServiceTest.java](backend/uca-cfc-connect/src/test/java/com/uca/cfc/service/PagoServiceTest.java)
+
+Resultado verificado: **PASS**.
+
+### 10. Base de datos PostgreSQL
+
+**Estado: Cumplido.**
+
+Fragmentos:
+
+```yaml
+spring:
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/uca_cfc_connect}
+```
+
+Archivos:
+
+- [compose.yaml](backend/uca-cfc-connect/compose.yaml)
+- [application.yml](backend/uca-cfc-connect/src/main/resources/application.yml)
+- [db/esquema_completo.sql](backend/uca-cfc-connect/db/esquema_completo.sql)
+- [migraciones Flyway](backend/uca-cfc-connect/src/main/resources/db/migration)
+
+### 11. Git, GitHub y ramas por funcionalidad
+
+**Estado: Parcial; requiere evidencia del historial remoto.**
+
+La convención está documentada en [backend README](backend/uca-cfc-connect/README.md)
+y en la plantilla [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md).
+
+Para cerrar este criterio faltan evidencias externas al código:
+
+- URL del repositorio GitHub entregado.
+- Ramas `develop` y `feature/<modulo>-<nombre>`.
+- Commits por funcionalidad.
+- Pull Requests y revisiones.
+
+### 12. Entregable PDF
+
+**Estado: Pendiente de preparar como entrega final.**
+
+El PDF debe contener:
+
+- Carátula.
+- Enlace al repositorio.
+- Capturas reales de pruebas unitarias.
+
+Evidencias complementarias recomendadas: Swagger, Postman, roles, logout y
+PostgreSQL ejecutándose.
+
+Ruta pendiente recomendada:
+
+```text
+docs/entrega/UCA-CFC-Connect-Entrega.pdf
+```
+
+Este archivo es **faltante** y no se crea automáticamente porque requiere
+información académica y capturas reales del equipo.
+
+## Postman: colección base y colección completa
+
+La colección base que ya fue validada y no debe modificarse es:
+
+- [UCA-CFC Connect - API y seguridad.postman_collection.json](backend/uca-cfc-connect/evidencias/UCA-CFC%20Connect%20-%20API%20y%20seguridad.postman_collection.json)
+
+Incluye:
+
+- Swagger y OpenAPI.
+- Login correcto e incorrecto.
+- Perfil.
+- Refresh con rotación.
+- `401` sin token.
+- `403` por rol.
+- Filtros, paginación y ordenamiento.
+- Logout.
+- Verificación de token revocado.
+
+### ¿Le faltaban pruebas?
+
+Sí. La colección base validaba los flujos de seguridad y algunas búsquedas,
+pero no recorría explícitamente la lectura paginada de cada módulo REST.
+
+Se creó una colección adicional, sin alterar la base:
+
+- [UCA-CFC Connect Completo.postman_collection.json](backend/uca-cfc-connect/evidencias/UCA-CFC%20Connect%20Completo.postman_collection.json)
+
+La colección completa conserva todas las carpetas originales y agrega:
+
+- `05 - CRUD lectura por modulo`: una prueba `GET` no destructiva para cada
+  recurso principal.
+- `06 - Repeticion segura y contrato`: verificación adicional de perfil,
+  campos básicos y usuarios paginados/ordenados.
+
+No se añadieron `POST`, `PUT` ni `DELETE` automáticos para los módulos porque
+podrían crear, modificar o eliminar datos de demostración. Los CRUD de escritura
+deben probarse manualmente con datos controlados o en una base de pruebas.
+
+### Orden de ejecución
+
+Para cualquiera de las colecciones:
+
+1. Iniciar PostgreSQL y Spring Boot.
+2. Ejecutar `00 - Salud y documentacion`.
+3. Ejecutar `01 - Autenticacion`.
+4. Ejecutar `02 - Autorizacion y errores`.
+5. Ejecutar `03 - Busquedas y paginacion`.
+6. Ejecutar las carpetas adicionales de la colección completa.
+7. Ejecutar `04 - Cierre de sesion` al final.
+8. Limpiar `accessToken` y `refreshToken` en las variables de colección antes
+   de una nueva ejecución completa.
+
+La prueba de token revocado debe producir `401`; ese resultado es correcto.
+
+## Archivos faltantes para cerrar la entrega
+
+Estos archivos no son necesarios para que la API funcione, pero sí pueden ser
+necesarios para entregar todos los aspectos académicos de la rúbrica:
+
+- `docs/entrega/UCA-CFC-Connect-Entrega.pdf` — **faltante**: carátula, enlace y
+  capturas reales.
+- `docs/arquitectura/diagrama-componentes.png` — **faltante recomendado** si la
+  rúbrica exige un diagrama visual; la arquitectura sí existe en código.
+- `docs/pruebas/capturas/` — **faltante recomendado** para guardar capturas
+  finales de JUnit, Swagger, Postman y Docker.
+- `frontend/` — **pendiente de implementación**, no es una carencia del backend.
+
+No se consideran faltantes de implementación: Swagger, JWT, roles, validaciones,
+CRUD, búsquedas, PostgreSQL, Flyway, pruebas unitarias y ambas colecciones
+Postman ya están en el backend.
+
+## Git y colaboración
+
+Usar ramas por funcionalidad:
+
+```powershell
+git checkout develop
+git pull origin develop
+git checkout -b feature/frontend-auth
+git add .
+git commit -m "feat(frontend): agrega flujo de autenticacion"
+git push origin feature/frontend-auth
+```
+
+Convenciones recomendadas: `feat:`, `fix:`, `test:`, `docs:`, `refactor:` y
+`chore:`.
+
+## Licencia y datos
+
+Las credenciales incluidas son datos de demostración. Cambiar secretos, usuarios
+y contraseñas antes de cualquier despliegue real.
