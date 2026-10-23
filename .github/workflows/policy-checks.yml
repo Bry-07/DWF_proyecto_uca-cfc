@@ -1,0 +1,54 @@
+name: Policy checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  governance:
+    name: Validate branch flow and PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branching strategy
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$BASE_BRANCH" == "main" ]]; then
+            if [[ "$HEAD_BRANCH" != "develop" && ! "$HEAD_BRANCH" =~ ^hotfix/.+ ]]; then
+              echo "❌ Hacia 'main' solo se permite PR desde 'develop' o 'hotfix/*'."
+              exit 1
+            fi
+          elif [[ "$BASE_BRANCH" == "develop" ]]; then
+            if [[ ! "$HEAD_BRANCH" =~ ^(feature|fix|hotfix|chore|docs)/[a-z0-9._-]+$ ]]; then
+              echo "❌ Hacia 'develop' solo se permiten ramas feature/*, fix/*, hotfix/*, chore/* o docs/*."
+              exit 1
+            fi
+          else
+            echo "❌ Base branch no permitida: $BASE_BRANCH"
+            exit 1
+          fi
+
+      - name: Validate PR title convention
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          PATTERN='^(feat|fix|docs|refactor|test|chore|build|ci|perf|revert)(\([a-z0-9._-]+\))?: .{8,}$'
+
+          if [[ ! "$PR_TITLE" =~ $PATTERN ]]; then
+            echo "❌ El título del PR debe seguir Conventional Commits."
+            echo "Ejemplo: feat(inscripciones): agrega validación de cupos"
+            exit 1
+          fi
+
+          echo "✅ Título de PR válido."
