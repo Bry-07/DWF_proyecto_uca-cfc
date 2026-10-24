@@ -1,0 +1,73 @@
+/* ==========================================================
+   UCA · CFC Connect — tokens y base global
+   Fuente de verdad: los 6 mockups HTML (mismas variables).
+   ========================================================== */
+:root {
+  --ink: #14213b;
+  --ink-2: #1b2540;
+  --ink-3: #232f4d;
+  --paper: #f5f6f8;
+  --surface: #ffffff;
+  --line: #e2e5ec;
+  --line-2: #d6dae3;
+  --text: #12172b;
+  --muted: #68728c;
+  --muted-2: #8a93aa;
+  --teal: #2f6f6b;
+  --teal-deep: #1f4e4b;
+  --teal-tint: #e4efee;
+  --amber: #c98a2e;
+  --amber-tint: #fbf0df;
+  --green: #3f7d5c;
+  --green-tint: #e7f1eb;
+  --red: #b23a3a;
+  --red-tint: #f8e9e9;
+  --plum: #6b5b95;
+  --plum-tint: #edeaf5;
+  --slate: #5b6478;
+  --slate-tint: #eef0f4;
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 2px rgba(20, 33, 59, 0.05),
+    0 10px 26px -14px rgba(20, 33, 59, 0.16);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--paper);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

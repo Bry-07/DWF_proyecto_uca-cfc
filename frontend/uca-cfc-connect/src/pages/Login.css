@@ -1,0 +1,49 @@
+/* Mockup 01 — login */
+.screen { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; }
+.brand-panel { background: linear-gradient(165deg, var(--ink) 0%, var(--ink-2) 62%, var(--ink-3) 100%); color: #eaedf6; position: relative; overflow: hidden; padding: 56px 56px 56px 64px; display: flex; flex-direction: column; justify-content: space-between; }
+.brand-top { display: flex; align-items: center; gap: 12px; }
+.brand-top .mark { width: 38px; height: 38px; border-radius: 9px; font-size: 14px; letter-spacing: 0.02em; }
+.brand-top .brand-name { font-size: 15px; letter-spacing: 0.01em; }
+.brand-top .brand-name small { font-size: 11.5px; color: #9faac6; letter-spacing: 0.04em; margin-top: 2px; }
+.pitch { max-width: 380px; }
+.eyebrow { font-family: 'IBM Plex Mono'; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #7fb0ab; margin-bottom: 18px; }
+.pitch h1 { font-family: 'Space Grotesk'; font-weight: 600; font-size: 33px; line-height: 1.22; color: #f4f6fb; margin-bottom: 16px; }
+.pitch p { font-size: 14.5px; line-height: 1.65; color: #b9c1d9; }
+.ruler-wrap { display: flex; align-items: stretch; gap: 22px; margin: 38px 0 42px; }
+.ruler-track { width: 2px; background: rgba(255, 255, 255, 0.12); border-radius: 2px; position: relative; height: 220px; }
+.slot { position: absolute; left: -5px; width: 12px; height: 22px; border-radius: 3px; }
+.slot.busy-teal { background: var(--teal); }
+.slot.busy-amber { background: var(--amber); }
+.slot.conflict { background: var(--red); box-shadow: 0 0 0 3px rgba(178, 58, 58, 0.28); }
+.ruler-labels { display: flex; flex-direction: column; justify-content: space-between; height: 220px; font-family: 'IBM Plex Mono'; font-size: 10.5px; color: #7c88a8; }
+.ruler-caption { max-width: 170px; font-size: 12.5px; line-height: 1.55; color: #8d98b7; align-self: center; }
+.foot-note { display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono'; font-size: 11px; color: #71809f; }
+.foot-note .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+
+.form-panel { display: flex; align-items: center; justify-content: center; padding: 40px; }
+.form-card { width: 100%; max-width: 378px; }
+.form-card .top-mark { font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 10px; }
+.form-card h2 { font-family: 'Space Grotesk'; font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+.form-card .sub { font-size: 13.5px; color: var(--muted); margin-bottom: 32px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.check input { accent-color: var(--teal); }
+.link { font-size: 13px; color: var(--teal-deep); font-weight: 500; background: none; border: none; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 26px 0; color: var(--muted-2); font-size: 11.5px; font-family: 'IBM Plex Mono'; text-transform: uppercase; letter-spacing: 0.08em; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.roles { display: flex; flex-wrap: wrap; gap: 8px; }
+.role-pill { font-size: 11.5px; font-family: 'IBM Plex Mono'; padding: 6px 10px; border-radius: 20px; border: 1px solid var(--line); color: var(--muted); background: #fff; }
+
+@media (max-width: 880px) {
+  .screen { grid-template-columns: 1fr; }
+  .brand-panel { padding: 40px 32px; }
+  .ruler-wrap { display: none; }
+}
+
+.form-card.wide { max-width: 460px; }
+.form-card .field-grid { margin-bottom: 0; }
+.form-card .field-grid .field { margin-bottom: 0; }
+.form-card .field-grid + .field, .form-card .field + .field-grid, .form-card .field-grid + .field-grid { margin-top: 16px; }
+.form-card .notice { background: var(--slate-tint); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text); margin-bottom: 20px; }
+.form-card .field .hint { font-size: 11.5px; color: var(--muted-2); margin-top: 5px; }
+.form-card a.link { text-decoration: none; }

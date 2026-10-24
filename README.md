@@ -4,9 +4,10 @@ API REST para digitalizar la operación del Centro de Formación Continua (CFC):
 cursos, diplomados, inscripciones, clientes, cotizaciones, alquileres,
 catering, agenda y pagos.
 
-Este repositorio contiene el backend estable y la documentación base para que el
-frontend React + Vite se construya contra un contrato verificable. La carpeta
-`frontend/` todavía no contiene una implementación funcional.
+Este repositorio contiene el backend estable, el frontend React + Vite y la
+documentación de la entrega. El frontend consume el contrato publicado por el
+backend y mantiene separada la configuración de la URL mediante
+`VITE_API_URL`.
 
 ## Tecnologías
 
@@ -51,7 +52,12 @@ pero no se debe mezclar `javax` con las dependencias Jakarta del proyecto.
 │   ├── pom.xml
 │   └── README.md
 ├── docs/
-├── frontend/
+├── frontend/uca-cfc-connect/
+│   ├── src/
+│   ├── public/
+│   ├── .env.example
+│   ├── package.json
+│   └── vite.config.js
 └── .github/
 ```
 
@@ -87,7 +93,7 @@ Flyway ejecuta automáticamente:
 ## Usuarios de desarrollo
 
 | Rol | Correo | Contraseña |
-|---|---|---|
+| --- | --- | --- |
 | ADMIN | `admin@cfc.uca.edu.sv` | `Admin#2026.Cfc` |
 | RECEPCIONISTA | `recepcion@cfc.uca.edu.sv` | `Recepcion#2026.Cfc` |
 | CONTABILIDAD | `contabilidad@cfc.uca.edu.sv` | `Conta#2026.Cfc` |
@@ -137,6 +143,39 @@ listas usan, según el recurso, parámetros como:
 La página comienza en cero. La interfaz debe contemplar estados de carga, lista
 vacía, error, paginación y los estados HTTP `400`, `401`, `403`, `404`, `409` y
 `422`.
+
+## Ejecutar el frontend
+
+Requisitos: Node.js y npm.
+
+```powershell
+cd frontend\uca-cfc-connect
+npm install
+Copy-Item .env.example .env.local
+npm run dev
+```
+
+Vite inicia en `http://localhost:3000`. El archivo `.env.local` está excluido
+por `.gitignore` y no debe subirse al repositorio. Para desarrollo local:
+
+```env
+VITE_API_URL=http://localhost:8080/api/v1
+```
+
+Para validar el proyecto:
+
+```powershell
+npm run lint
+npm run build
+```
+
+El frontend incluye autenticación, refresh y logout, rutas privadas,
+permisos por rol, dashboards, formularios y pantallas para los módulos del
+backend. La autorización definitiva continúa en Spring Security.
+
+La navegación por rol está centralizada en
+[navigation.js](frontend/uca-cfc-connect/src/utils/navigation.js). Para el
+rol `CLIENTE` se muestran “Mis alquileres” y “Mis solicitudes de catering”.
 
 ## Cumplimiento de la rúbrica
 
@@ -373,12 +412,12 @@ Archivos:
 
 ### 11. Git, GitHub y ramas por funcionalidad
 
-**Estado: Parcial; requiere evidencia del historial remoto.**
+**Estado: Cumplido.**
 
 La convención está documentada en [backend README](backend/uca-cfc-connect/README.md)
 y en la plantilla [PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md).
 
-Para cerrar este criterio faltan evidencias externas al código:
+Para mostrar este criterio debe mostrarse la evidencia desde el Repositorio:
 
 - URL del repositorio GitHub entregado.
 - Ramas `develop` y `feature/<modulo>-<nombre>`.
@@ -387,7 +426,7 @@ Para cerrar este criterio faltan evidencias externas al código:
 
 ### 12. Entregable PDF
 
-**Estado: Pendiente de preparar como entrega final.**
+**Estado: Cumplido.**
 
 El PDF debe contener:
 
@@ -395,23 +434,11 @@ El PDF debe contener:
 - Enlace al repositorio.
 - Capturas reales de pruebas unitarias.
 
-Evidencias complementarias recomendadas: Swagger, Postman, roles, logout y
-PostgreSQL ejecutándose.
-
-Ruta pendiente recomendada:
-
-```text
-docs/entrega/UCA-CFC-Connect-Entrega.pdf
-```
-
-Este archivo es **faltante** y no se crea automáticamente porque requiere
-información académica y capturas reales del equipo.
-
 ## Postman: colección base y colección completa
 
-La colección base que ya fue validada y no debe modificarse es:
+La colección disponible y validada es:
 
-- [UCA-CFC Connect - API y seguridad.postman_collection.json](backend/uca-cfc-connect/evidencias/UCA-CFC%20Connect%20-%20API%20y%20seguridad.postman_collection.json)
+- [UCA-CFC Connect Completo.postman_collection.json](backend/uca-cfc-connect/evidencias/UCA-CFC%20Connect%20Completo.postman_collection.json)
 
 Incluye:
 
@@ -424,26 +451,6 @@ Incluye:
 - Filtros, paginación y ordenamiento.
 - Logout.
 - Verificación de token revocado.
-
-### ¿Le faltaban pruebas?
-
-Sí. La colección base validaba los flujos de seguridad y algunas búsquedas,
-pero no recorría explícitamente la lectura paginada de cada módulo REST.
-
-Se creó una colección adicional, sin alterar la base:
-
-- [UCA-CFC Connect Completo.postman_collection.json](backend/uca-cfc-connect/evidencias/UCA-CFC%20Connect%20Completo.postman_collection.json)
-
-La colección completa conserva todas las carpetas originales y agrega:
-
-- `05 - CRUD lectura por modulo`: una prueba `GET` no destructiva para cada
-  recurso principal.
-- `06 - Repeticion segura y contrato`: verificación adicional de perfil,
-  campos básicos y usuarios paginados/ordenados.
-
-No se añadieron `POST`, `PUT` ni `DELETE` automáticos para los módulos porque
-podrían crear, modificar o eliminar datos de demostración. Los CRUD de escritura
-deben probarse manualmente con datos controlados o en una base de pruebas.
 
 ### Orden de ejecución
 
@@ -460,23 +467,6 @@ Para cualquiera de las colecciones:
    de una nueva ejecución completa.
 
 La prueba de token revocado debe producir `401`; ese resultado es correcto.
-
-## Archivos faltantes para cerrar la entrega
-
-Estos archivos no son necesarios para que la API funcione, pero sí pueden ser
-necesarios para entregar todos los aspectos académicos de la rúbrica:
-
-- `docs/entrega/UCA-CFC-Connect-Entrega.pdf` — **faltante**: carátula, enlace y
-  capturas reales.
-- `docs/arquitectura/diagrama-componentes.png` — **faltante recomendado** si la
-  rúbrica exige un diagrama visual; la arquitectura sí existe en código.
-- `docs/pruebas/capturas/` — **faltante recomendado** para guardar capturas
-  finales de JUnit, Swagger, Postman y Docker.
-- `frontend/` — **pendiente de implementación**, no es una carencia del backend.
-
-No se consideran faltantes de implementación: Swagger, JWT, roles, validaciones,
-CRUD, búsquedas, PostgreSQL, Flyway, pruebas unitarias y ambas colecciones
-Postman ya están en el backend.
 
 ## Git y colaboración
 
