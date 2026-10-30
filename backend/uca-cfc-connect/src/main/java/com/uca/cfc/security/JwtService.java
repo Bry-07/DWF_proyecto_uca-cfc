@@ -51,6 +51,7 @@ public class JwtService {
                 .id(jti)
                 .claim(CLAIM_USUARIO_ID, usuario.getId())
                 .claim(CLAIM_ROL, usuario.getRol().getNombre())
+                .claim(JwtClaims.VERSION_SESION, usuario.getVersion())
                 .build();
         JwsHeader cabecera = JwsHeader.with(MacAlgorithm.HS256).build();
 

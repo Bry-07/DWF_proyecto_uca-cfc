@@ -17,6 +17,7 @@ import com.uca.cfc.exception.ResourceNotFoundException;
 import com.uca.cfc.mapper.SeguridadMapper;
 import com.uca.cfc.repository.ClienteRepository;
 import com.uca.cfc.repository.UsuarioRepository;
+import com.uca.cfc.repository.RefreshTokenRepository;
 
 /**
  * Reglas de negocio de los usuarios.
@@ -34,14 +35,17 @@ public class UsuarioService {
     private final RolService rolService;
     private final PasswordEncoder passwordEncoder;
     private final SeguridadMapper mapper;
+    private final RefreshTokenRepository refreshTokens;
 
     public UsuarioService(UsuarioRepository usuarioRepository, ClienteRepository clienteRepository,
-            RolService rolService, PasswordEncoder passwordEncoder, SeguridadMapper mapper) {
+            RolService rolService, PasswordEncoder passwordEncoder, SeguridadMapper mapper,
+            RefreshTokenRepository refreshTokens) {
         this.usuarioRepository = usuarioRepository;
         this.clienteRepository = clienteRepository;
         this.rolService = rolService;
         this.passwordEncoder = passwordEncoder;
         this.mapper = mapper;
+        this.refreshTokens = refreshTokens;
     }
 
     public PageResponse<UsuarioResponse> listar(Long rolId, EstadoUsuario estado, String texto, Pageable pageable) {
@@ -83,6 +87,7 @@ public class UsuarioService {
         if (request.password() != null && !request.password().isBlank()) {
             usuario.setPasswordHash(passwordEncoder.encode(request.password()));
         }
+        refreshTokens.revocarTodosDelUsuario(id);
         return mapper.aResponse(usuarioRepository.save(usuario));
     }
 
@@ -90,6 +95,7 @@ public class UsuarioService {
     public UsuarioResponse cambiarEstado(Long id, EstadoUsuario estado) {
         Usuario usuario = buscar(id);
         usuario.setEstado(estado);
+        refreshTokens.revocarTodosDelUsuario(id);
         return mapper.aResponse(usuarioRepository.save(usuario));
     }
 

@@ -9,7 +9,7 @@ export const NAV_GROUPS = [
   {
     label: 'Operación',
     items: [
-      { path: '/agenda', label: 'Agenda', icon: 'agenda', roles: [ADMIN, RECEPCIONISTA, CONTABILIDAD] },
+      { path: '/agenda', label: 'Agenda', icon: 'agenda', roles: [ADMIN, RECEPCIONISTA] },
       { path: '/cursos', label: 'Cursos y diplomados', icon: 'cursos', roles: [ADMIN, RECEPCIONISTA, CLIENTE] },
       { path: '/clientes', label: 'Clientes', icon: 'clientes', roles: [ADMIN, RECEPCIONISTA, CONTABILIDAD] },
       { path: '/inscripciones', label: 'Inscripciones', icon: 'inscripciones', roles: [ADMIN, RECEPCIONISTA, CLIENTE] },
@@ -21,7 +21,7 @@ export const NAV_GROUPS = [
     items: [
       { path: '/espacios', label: 'Espacios', clientLabel: 'Mis alquileres', icon: 'espacios', roles: [ADMIN, RECEPCIONISTA, CLIENTE] },
       { path: '/catering', label: 'Catering', clientLabel: 'Mis solicitudes de catering', icon: 'catering', roles: [ADMIN, RECEPCIONISTA, CLIENTE] },
-      { path: '/pagos', label: 'Pagos', icon: 'pagos', roles: [ADMIN, CONTABILIDAD, CLIENTE] },
+      { path: '/pagos', label: 'Pagos', icon: 'pagos', roles: [ADMIN, RECEPCIONISTA, CONTABILIDAD, CLIENTE] },
     ],
   },
   {

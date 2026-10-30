@@ -1,5 +1,34 @@
 # UCA-CFC Connect
 
+## Correcciones y verificación
+
+La comparación del código anterior y el corregido, los archivos afectados y las
+pruebas de regresión están en [Correcciones y pruebas](docs/correcciones-y-pruebas.md).
+
+Para verificar todas las pruebas Java con una base PostgreSQL dedicada:
+
+```bash
+cd backend/uca-cfc-connect
+docker compose -f compose.test.yaml up -d --wait
+DATABASE_URL=jdbc:postgresql://localhost:55432/uca_cfc_connect_test sh ./mvnw '-Dtest=*Test,*IT' verify
+docker compose -f compose.test.yaml down
+```
+
+Las pruebas de integración crean datos y requieren exclusivamente una base de pruebas.
+`sh ./mvnw test` ejecuta las pruebas unitarias sin PostgreSQL. En el frontend,
+ejecutar `npm ci`, `npm test`, `npm run lint` y `npm run build`.
+
+Flyway aplica también `V5__sesiones_y_correlativos.sql`: agrega la revisión de
+cuentas, corrige estados financieros inconsistentes y prepara los correlativos
+anuales atómicos. Después de actualizar, se debe iniciar sesión nuevamente:
+los JWT anteriores no incluyen la revisión de la cuenta.
+
+La recuperación permite usar un código de prueba en el perfil `dev`. Para correo
+real, usar un perfil distinto de `dev` y configurar `SPRING_MAIL_HOST`,
+`SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` y `FRONTEND_URL`.
+El transporte SMTP y TLS se configuran con las variables documentadas en
+`backend/uca-cfc-connect/.env.example`.
+
 API REST para digitalizar la operación del Centro de Formación Continua (CFC):
 cursos, diplomados, inscripciones, clientes, cotizaciones, alquileres,
 catering, agenda y pagos.

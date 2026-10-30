@@ -157,9 +157,9 @@ export default function CotizacionNueva() {
 
           <div className="panel">
             <h2>Estado de la solicitud</h2>
-            <p className="hint">Al enviarla, nace como Pendiente y Administración la revisa.</p>
-            <Timeline estado="PENDIENTE" />
-            <div className="alert-bar info"><Icon name="alert" /><span>Si incluye un espacio, se verificará la disponibilidad antes de aprobar.</span></div>
+            <p className="hint">Al enviarla, queda En proceso y Administración la revisa.</p>
+            <Timeline estado="EN_PROCESO" />
+            <div className="alert-bar info"><Icon name="alert" /><span>La cotización no reserva un espacio. La disponibilidad se valida al registrar el alquiler.</span></div>
           </div>
         </div>
       )}

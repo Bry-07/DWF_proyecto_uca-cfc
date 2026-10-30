@@ -47,7 +47,6 @@ import com.uca.cfc.repository.SolicitudCateringRepository;
 public class PagoService {
 
     private static final String RECURSO = "Pago";
-    private static final String PREFIJO_COMPROBANTE = "CFC";
 
     private static final Logger log = LoggerFactory.getLogger(PagoService.class);
 
@@ -60,11 +59,12 @@ public class PagoService {
     private final ClienteService clienteService;
     private final PagoMapper mapper;
     private final Clock clock;
+    private final NumeroComprobanteService numeros;
 
     public PagoService(PagoRepository pagoRepository, ComprobanteRepository comprobanteRepository,
             InscripcionRepository inscripcionRepository, CotizacionRepository cotizacionRepository,
             AlquilerRepository alquilerRepository, SolicitudCateringRepository solicitudCateringRepository,
-            ClienteService clienteService, PagoMapper mapper, Clock clock) {
+            ClienteService clienteService, PagoMapper mapper, Clock clock, NumeroComprobanteService numeros) {
         this.pagoRepository = pagoRepository;
         this.comprobanteRepository = comprobanteRepository;
         this.inscripcionRepository = inscripcionRepository;
@@ -74,6 +74,7 @@ public class PagoService {
         this.clienteService = clienteService;
         this.mapper = mapper;
         this.clock = clock;
+        this.numeros = numeros;
     }
 
     public PageResponse<PagoResponse> listar(Long clienteId, ConceptoPago concepto, EstadoPago estado,
@@ -95,7 +96,7 @@ public class PagoService {
     @Transactional
     public PagoResponse crear(PagoRequest request) {
         Cliente cliente = clienteService.buscar(request.clienteId());
-        validarReferencia(request.concepto(), request.referenciaId());
+        validarReferencia(request.concepto(), request.referenciaId(), request.clienteId());
 
         BigDecimal montoPagado = request.montoPagado() == null ? BigDecimal.ZERO : request.montoPagado();
         if (montoPagado.compareTo(request.montoEsperado()) > 0) {
@@ -122,7 +123,7 @@ public class PagoService {
     /** Registra un abono adicional y recalcula el estado del pago. */
     @Transactional
     public PagoResponse abonar(Long id, AbonoPagoRequest request) {
-        Pago pago = buscar(id);
+        Pago pago = buscarParaActualizar(id);
         if (pago.getEstado() == EstadoPago.PAGADO) {
             throw new BusinessException("El pago ya está saldado");
         }
@@ -143,11 +144,11 @@ public class PagoService {
     /** Validación financiera, a cargo del área de contabilidad. */
     @Transactional
     public PagoResponse validar(Long id, String responsable) {
-        Pago pago = buscar(id);
+        Pago pago = buscarParaActualizar(id);
         if (pago.estaValidado()) {
             throw new BusinessException("El pago ya fue validado el " + pago.getFechaValidacion());
         }
-        if (pago.getEstado() == EstadoPago.PENDIENTE) {
+        if (pago.getMontoPagado().signum() <= 0) {
             throw new BusinessException("No se puede validar un pago sin monto recibido");
         }
         pago.setFechaValidacion(LocalDateTime.now(clock));
@@ -158,7 +159,7 @@ public class PagoService {
     /** Confirmación en recepción, posterior a la validación financiera. */
     @Transactional
     public PagoResponse confirmar(Long id, String responsable) {
-        Pago pago = buscar(id);
+        Pago pago = buscarParaActualizar(id);
         if (!pago.estaValidado()) {
             throw new BusinessException("El pago debe ser validado por contabilidad antes de confirmarse");
         }
@@ -172,7 +173,7 @@ public class PagoService {
 
     @Transactional
     public PagoResponse cambiarEstado(Long id, EstadoPago destino) {
-        Pago pago = buscar(id);
+        Pago pago = buscarParaActualizar(id);
         EstadoPago actual = pago.getEstado();
 
         if (actual == destino) {
@@ -183,9 +184,8 @@ public class PagoService {
                     + destino);
         }
 
-        // El monto acompaña al estado: marcar PAGADO salda el registro
-        if (destino == EstadoPago.PAGADO) {
-            pago.setMontoPagado(pago.getMontoEsperado());
+        if (destino != calcularEstado(pago.getMontoPagado(), pago.getMontoEsperado())) {
+            throw new BusinessException("El estado debe corresponder al monto recibido. Registre un abono");
         }
         pago.setEstado(destino);
         log.info("Pago {}: estado {} → {}", id, actual, destino);
@@ -195,7 +195,7 @@ public class PagoService {
     /** Borrado lógico: el registro deja de aparecer pero permanece en la base de datos. */
     @Transactional
     public void eliminar(Long id) {
-        Pago pago = buscar(id);
+        Pago pago = buscarParaActualizar(id);
         if (comprobanteRepository.existsByPagoId(id)) {
             throw new BusinessException(
                     "No se puede eliminar un pago con comprobante emitido. Anule primero el comprobante");
@@ -209,7 +209,7 @@ public class PagoService {
 
     @Transactional
     public ComprobanteResponse emitirComprobante(Long pagoId, ComprobanteRequest request) {
-        Pago pago = buscar(pagoId);
+        Pago pago = buscarParaActualizar(pagoId);
         if (comprobanteRepository.existsByPagoId(pagoId)) {
             throw new DuplicateResourceException("El pago ya tiene un comprobante emitido");
         }
@@ -219,7 +219,7 @@ public class PagoService {
 
         Comprobante comprobante = new Comprobante();
         comprobante.setPago(pago);
-        comprobante.setNumero(generarNumero());
+        comprobante.setNumero(numeros.siguiente(LocalDate.now(clock).getYear()));
         comprobante.setFechaEmision(LocalDateTime.now(clock));
         comprobante.setEmitidoA(pago.getCliente().getNombre());
         comprobante.setMonto(pago.getMontoPagado());
@@ -282,24 +282,26 @@ public class PagoService {
         return pagado.compareTo(esperado) >= 0 ? EstadoPago.PAGADO : EstadoPago.PARCIAL;
     }
 
-    /** El pago debe apuntar a un registro real del concepto declarado. */
-    private void validarReferencia(ConceptoPago concepto, Long referenciaId) {
-        boolean existe = switch (concepto) {
-            case INSCRIPCION -> inscripcionRepository.existsById(referenciaId);
-            case COTIZACION -> cotizacionRepository.existsById(referenciaId);
-            case ALQUILER -> alquilerRepository.existsById(referenciaId);
-            case CATERING -> solicitudCateringRepository.existsById(referenciaId);
-        };
-        if (!existe) {
-            throw new ResourceNotFoundException(
-                    "No existe " + concepto.name().toLowerCase() + " con id " + referenciaId);
-        }
+    private Pago buscarParaActualizar(Long id) {
+        return pagoRepository.findForUpdateById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RECURSO, id));
     }
 
-    private String generarNumero() {
-        int anio = LocalDate.now(clock).getYear();
-        String prefijo = PREFIJO_COMPROBANTE + "-" + anio + "-";
-        long correlativo = comprobanteRepository.countByNumeroStartingWith(prefijo) + 1;
-        return prefijo + String.format("%06d", correlativo);
+    /** La referencia debe existir y pertenecer al mismo expediente que el pago. */
+    private void validarReferencia(ConceptoPago concepto, Long referenciaId, Long clienteId) {
+        String mensaje = "No existe " + concepto.name().toLowerCase() + " con id " + referenciaId;
+        Cliente propietario = switch (concepto) {
+            case INSCRIPCION -> inscripcionRepository.findById(referenciaId)
+                    .orElseThrow(() -> new ResourceNotFoundException(mensaje)).getCliente();
+            case COTIZACION -> cotizacionRepository.findById(referenciaId)
+                    .orElseThrow(() -> new ResourceNotFoundException(mensaje)).getCliente();
+            case ALQUILER -> alquilerRepository.findById(referenciaId)
+                    .orElseThrow(() -> new ResourceNotFoundException(mensaje)).getCliente();
+            case CATERING -> solicitudCateringRepository.findById(referenciaId)
+                    .orElseThrow(() -> new ResourceNotFoundException(mensaje)).getCliente();
+        };
+        if (!propietario.getId().equals(clienteId)) {
+            throw new BusinessException("El documento referenciado no pertenece al cliente del pago");
+        }
     }
 }

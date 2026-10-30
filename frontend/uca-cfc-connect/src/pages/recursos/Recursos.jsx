@@ -13,7 +13,7 @@ import { dateTimeLabel } from '../../utils/dates'
 import { changeEstado } from '../../utils/estadoFlow'
 import { money } from '../../utils/format'
 import { ENUMS, enumOptions, humanize } from '../../utils/labels'
-import { isStaff } from '../../utils/permissions'
+import { canManageCatalog, isStaff } from '../../utils/permissions'
 
 const espacioFields = [
   { name: 'nombre', label: 'Nombre', required: true, maxLength: 100 },
@@ -25,7 +25,7 @@ const espacioFields = [
   { name: 'equipamiento', label: 'Equipamiento', type: 'textarea', maxLength: 500 },
 ]
 
-function Espacios({ staff }) {
+function Espacios({ canEdit }) {
   const list = usePagedList(espaciosApi.list, {})
   const [form, setForm] = useState(null)
   const submit = async (body) => {
@@ -37,7 +37,7 @@ function Espacios({ staff }) {
   }
   return (
     <>
-      {staff && <div className="toolbar"><span className="spacer" /><button type="button" className="btn-primary" onClick={() => setForm({})}>Nuevo espacio</button></div>}
+      {canEdit && <div className="toolbar"><span className="spacer" /><button type="button" className="btn-primary" onClick={() => setForm({})}>Nuevo espacio</button></div>}
       <DataTable
         {...list}
         rows={list.items}
@@ -48,7 +48,7 @@ function Espacios({ staff }) {
           { header: 'Capacidad', className: 'num', render: (r) => r.capacidad },
           { header: 'Precio/hora', className: 'num', render: (r) => money(r.precioPorHora) },
           { header: 'Estado', render: (r) => <StatusBadge value={r.estado} /> },
-          { header: '', render: (r) => staff && <button type="button" className="link-action" onClick={() => setForm({ item: r })}>Editar</button> },
+          { header: '', render: (r) => canEdit && <button type="button" className="link-action" onClick={() => setForm({ item: r })}>Editar</button> },
         ]}
       />
       {form && <FormModal title={form.item ? 'Editar espacio' : 'Nuevo espacio'} fields={espacioFields} initial={form.item} onSubmit={submit} onClose={() => setForm(null)} />}
@@ -126,7 +126,7 @@ export default function Recursos() {
         <button type="button" className={`chip${tab === 'espacios' ? ' on' : ''}`} onClick={() => setTab('espacios')}>Espacios</button>
         <button type="button" className={`chip${tab === 'alquileres' ? ' on' : ''}`} onClick={() => setTab('alquileres')}>Alquileres</button>
       </div>
-      {tab === 'espacios' ? <Espacios staff={staff} /> : <Alquileres staff={staff} />}
+      {tab === 'espacios' ? <Espacios canEdit={canManageCatalog(role)} /> : <Alquileres staff={staff} />}
     </div>
   )
 }

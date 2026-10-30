@@ -34,8 +34,10 @@ export default function Registro() {
     else if (!RE.EMAIL.test(f.email.trim())) er.email = 'El correo no tiene un formato válido.'
     er.password = passwordError(f.password)
     if (!er.password && f.password !== f.password2) er.password2 = 'Las contraseñas no coinciden.'
-    if (f.dui && !RE.DUI.test(f.dui)) er.dui = 'Formato 00000000-0.'
+    if (!empresa && f.dui && !RE.DUI.test(f.dui)) er.dui = 'Formato 00000000-0.'
     if (f.nit && !RE.NIT.test(f.nit)) er.nit = 'Formato 0000-000000-000-0.'
+    if (!empresa && !f.dui.trim()) er.dui = 'El DUI es obligatorio para una persona particular.'
+    if (empresa && !f.nit.trim()) er.nit = 'El NIT es obligatorio para una empresa.'
     if (f.telefono && !RE.TEL.test(f.telefono)) er.telefono = 'Formato 0000-0000.'
     if (empresa && !f.razonSocial.trim()) er.razonSocial = 'Ingresa la razón social.'
     return Object.fromEntries(Object.entries(er).filter(([, v]) => v))
@@ -50,7 +52,7 @@ export default function Registro() {
 
     const body = {
       tipo: f.tipo, nombre: f.nombre.trim(), email: f.email.trim(), password: f.password,
-      dui: f.dui, nit: f.nit, telefono: f.telefono, direccion: f.direccion.trim(),
+      dui: empresa ? undefined : f.dui, nit: f.nit, telefono: f.telefono, direccion: f.direccion.trim(),
       ...(empresa && {
         empresa: { razonSocial: f.razonSocial.trim(), giro: f.giro, contactoNombre: f.contactoNombre, contactoCargo: f.contactoCargo },
       }),
@@ -99,9 +101,9 @@ export default function Registro() {
 
         <div className="field-grid">
           <AuthField id="telefono" label="Teléfono (opcional)" placeholder="0000-0000" value={f.telefono} onChange={set('telefono')} error={errors.telefono} />
-          <AuthField id="dui" label="DUI (opcional)" placeholder="00000000-0" value={f.dui} onChange={set('dui')} error={errors.dui} />
+          {!empresa && <AuthField id="dui" label="DUI *" placeholder="00000000-0" value={f.dui} onChange={set('dui')} error={errors.dui} />}
         </div>
-        <AuthField id="nit" label="NIT (opcional)" placeholder="0000-000000-000-0" value={f.nit} onChange={set('nit')} error={errors.nit} />
+        <AuthField id="nit" label={empresa ? 'NIT *' : 'NIT (opcional)'} placeholder="0000-000000-000-0" value={f.nit} onChange={set('nit')} error={errors.nit} />
         <AuthField id="direccion" label="Dirección (opcional)" maxLength={255} value={f.direccion} onChange={set('direccion')} error={errors.direccion} />
 
         {empresa && (

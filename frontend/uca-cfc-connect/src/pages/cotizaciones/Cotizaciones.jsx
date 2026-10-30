@@ -11,7 +11,7 @@ import { alertError, alertSuccess, confirmAction, promptText } from '../../utils
 import { getErrorMessage } from '../../utils/errorHandler'
 import { money, shortDate } from '../../utils/format'
 import { ENUMS, humanize } from '../../utils/labels'
-import { isStaff } from '../../utils/permissions'
+import { canResolveQuotation } from '../../utils/permissions'
 import CotizacionNueva from './CotizacionNueva'
 
 function Detalle({ cot, canResolve, onClose, onDone }) {
@@ -68,7 +68,7 @@ function Detalle({ cot, canResolve, onClose, onDone }) {
 
 function Lista() {
   const { role } = useAuth()
-  const staff = isStaff(role)
+  const canResolve = canResolveQuotation(role)
   const [estado, setEstado] = useState('')
   const list = usePagedList(cotizacionesApi.list, { estado: estado || undefined })
   const [sel, setSel] = useState(null)
@@ -104,7 +104,7 @@ function Lista() {
         ]}
       />
 
-      {sel && <Detalle cot={sel} canResolve={staff} onClose={() => setSel(null)} onDone={() => { setSel(null); list.refetch() }} />}
+      {sel && <Detalle cot={sel} canResolve={canResolve} onClose={() => setSel(null)} onDone={() => { setSel(null); list.refetch() }} />}
     </div>
   )
 }
