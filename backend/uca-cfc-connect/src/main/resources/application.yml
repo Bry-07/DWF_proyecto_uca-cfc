@@ -1,6 +1,17 @@
 spring:
   application:
     name: uca-cfc-connect
+  mail:
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${SMTP_STARTTLS:true}
+      mail.smtp.starttls.required: ${SMTP_STARTTLS:true}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
 
   profiles:
     default: dev
@@ -62,6 +73,11 @@ springdoc:
     display-request-duration: true
 
 app:
+  seguridad:
+    mostrar-token-recuperacion: false
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  correo:
+    remitente: ${SMTP_FROM:no-reply@cfc.uca.edu.sv}
   zona-horaria: America/El_Salvador
 
   jwt:

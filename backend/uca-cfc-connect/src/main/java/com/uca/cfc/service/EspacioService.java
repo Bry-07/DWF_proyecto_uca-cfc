@@ -17,6 +17,7 @@ import com.uca.cfc.entity.Alquiler;
 import com.uca.cfc.entity.Espacio;
 import com.uca.cfc.entity.enums.EstadoEspacio;
 import com.uca.cfc.entity.enums.TipoEspacio;
+import com.uca.cfc.entity.enums.TipoActividad;
 import com.uca.cfc.exception.DuplicateResourceException;
 import com.uca.cfc.exception.ResourceInUseException;
 import com.uca.cfc.exception.ResourceNotFoundException;
@@ -125,7 +126,7 @@ public class EspacioService {
 
         for (ActividadAgenda actividad : agendaRepository.buscarSolapamientos(id, rango.inicio(), rango.fin(), null)) {
             // Los alquileres ya aparecen listados arriba con su propio identificador
-            if (actividad.getTipo().esSincronizado() && actividad.getOrigenId() != null) {
+            if (actividad.getTipo() == TipoActividad.ALQUILER && actividad.getOrigenId() != null) {
                 continue;
             }
             ocupaciones.add(new DisponibilidadResponse.Ocupacion("AGENDA", actividad.getId(), actividad.getTitulo(),

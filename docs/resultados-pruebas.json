@@ -1,0 +1,133 @@
+{
+  "fecha": "2026-10-30",
+  "backend": {
+    "tests": 109,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "backend_suites": [
+    {
+      "name": "com.uca.cfc.security.JwtServiceTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.244"
+    },
+    {
+      "name": "com.uca.cfc.service.PagoServiceTest",
+      "tests": "20",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.458"
+    },
+    {
+      "name": "com.uca.cfc.service.RecuperacionPasswordServiceTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.078"
+    },
+    {
+      "name": "com.uca.cfc.service.AlquilerServiceTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.11"
+    },
+    {
+      "name": "com.uca.cfc.service.CorreoServiceTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.09"
+    },
+    {
+      "name": "com.uca.cfc.service.InscripcionServiceTest",
+      "tests": "9",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.124"
+    },
+    {
+      "name": "com.uca.cfc.integration.CorreoSmtpIT",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.353"
+    },
+    {
+      "name": "com.uca.cfc.security.UsuarioActualTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.121"
+    },
+    {
+      "name": "com.uca.cfc.security.UsuarioVigenteValidatorTest",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.024"
+    },
+    {
+      "name": "com.uca.cfc.util.IntervaloHorarioTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.019"
+    },
+    {
+      "name": "com.uca.cfc.service.CotizacionServiceTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.014"
+    },
+    {
+      "name": "com.uca.cfc.integration.ApplicationIT",
+      "tests": "14",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "12.203"
+    },
+    {
+      "name": "com.uca.cfc.service.AuthServiceTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.152"
+    }
+  ],
+  "frontend": {
+    "tests": 14,
+    "failures": 0,
+    "skipped": 0,
+    "lint": "passed",
+    "build": "passed"
+  },
+  "integracion_repetida": {
+    "tests": 15,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "limitaciones": [
+    "SMTP externo no probado; sí transporte SMTP local real.",
+    "Pruebas React con servicios simulados; sin E2E de navegador.",
+    "Aviso Vite: bundle principal aproximadamente 503 kB."
+  ]
+}

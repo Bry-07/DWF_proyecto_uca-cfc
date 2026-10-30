@@ -10,6 +10,9 @@ logging:
     org.flywaydb: INFO
 
 app:
+  seguridad:
+    # Código visible en la pantalla de recuperación solo en el perfil de desarrollo.
+    mostrar-token-recuperacion: true
   jwt:
     secret: ${JWT_SECRET:clave-solo-para-desarrollo-cambiar-en-produccion-2026}
     access-minutos: ${JWT_ACCESS_MINUTOS:15}

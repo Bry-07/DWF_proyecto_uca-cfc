@@ -14,23 +14,27 @@ import { monthRange } from '../../utils/dates'
 import { getErrorMessage } from '../../utils/errorHandler'
 import { money, shortDate } from '../../utils/format'
 import { ENUMS, enumOptions, humanize } from '../../utils/labels'
-import { isFinance } from '../../utils/permissions'
+import { canConfirmPayment, isFinance } from '../../utils/permissions'
+import { ROLES } from '../../utils/constants'
 
 const METHOD_COLORS = { TRANSFERENCIA: 'var(--teal)', TARJETA: 'var(--slate)', EFECTIVO: 'var(--amber)', DEPOSITO: 'var(--muted-2)' }
 
 export default function Pagos() {
   const { user, role } = useAuth()
   const finance = isFinance(role)
+  const canConfirm = canConfirmPayment(role)
+  const reception = role === ROLES.RECEPCIONISTA
   const [estado, setEstado] = useState('')
   const [month, setMonth] = useState('')
   const range = monthRange(month)
   const rangeKey = `${range.desde ?? ''}|${range.hasta ?? ''}`
 
-  const clienteId = finance ? undefined : user?.clienteId
+  const clienteId = role === ROLES.CLIENTE ? user?.clienteId : undefined
   const list = usePagedList(pagosApi.list, { estado: estado || undefined, clienteId, ...range })
   // El reporte de estados financieros es solo para ADMIN/CONTABILIDAD (el backend responde 403 al resto).
   // El cliente ve el mismo resumen, calculado a partir de sus propios pagos.
   const reportFn = useCallback(async () => {
+    if (reception) return null
     const [desde, hasta] = rangeKey.split('|')
     if (finance) return pagosApi.reporte(rangeKey === '|' ? {} : { desde, hasta })
     const { items } = await pagosApi.list({ clienteId, size: 200, desde, hasta })
@@ -42,7 +46,7 @@ export default function Pagos() {
       porEstado: group('estado').map(({ v, rows }) => ({ estado: v, cantidad: rows.length, saldo: sum(rows, 'saldo') })),
       porMetodo: group('metodo').map(({ v, rows }) => ({ metodo: v, montoPagado: sum(rows, 'montoPagado') })),
     }
-  }, [rangeKey, finance, clienteId])
+  }, [rangeKey, finance, clienteId, reception])
   const report = useFetch(reportFn)
   const clientsFn = useCallback(() => (finance ? fetchAll(clientesApi).then((c) => opt(c)) : Promise.resolve([])), [finance])
   const clients = useFetch(clientsFn)
@@ -90,7 +94,7 @@ export default function Pagos() {
       </div>
 
       <ErrorMessage message={report.error} onRetry={report.refetch} />
-      <div className="summary-row">
+      {!reception && <div className="summary-row">
         <div className="sum-card dark">
           <div className="lbl"><Icon name="pagos" />Cobrado</div>
           <div className="val">{money(report.data?.totalCobrado)}</div>
@@ -122,8 +126,7 @@ export default function Pagos() {
             })}
           </div>
         </div>
-      </div>
-
+      </div>}
       <div className="filters">
         <button type="button" className={`chip${estado === '' ? ' on' : ''}`} onClick={() => setEstado('')}>Todos</button>
         {ENUMS.ESTADO_PAGO.map((e) => <button key={e} type="button" className={`chip${estado === e ? ' on' : ''}`} onClick={() => setEstado(e)}>{humanize(e)}</button>)}
@@ -148,11 +151,11 @@ export default function Pagos() {
           {
             header: '',
             render: (r) =>
-              finance && (
+              (finance || canConfirm) && (
                 <div className="row-actions">
-                  {Number(r.saldo) > 0 && <button type="button" className="link-action" onClick={() => setAbono(r)}>Abono</button>}
-                  {!r.fechaValidacion && Number(r.montoPagado) > 0 && <button type="button" className="link-action" onClick={() => act('validar', r)}>Validar</button>}
-                  {r.fechaValidacion && !r.fechaConfirmacion && <button type="button" className="link-action" onClick={() => act('confirmar', r)}>Confirmar</button>}
+                  {finance && Number(r.saldo) > 0 && <button type="button" className="link-action" onClick={() => setAbono(r)}>Abono</button>}
+                  {finance && !r.fechaValidacion && Number(r.montoPagado) > 0 && <button type="button" className="link-action" onClick={() => act('validar', r)}>Validar</button>}
+                  {canConfirm && r.fechaValidacion && !r.fechaConfirmacion && <button type="button" className="link-action" onClick={() => act('confirmar', r)}>Confirmar</button>}
                 </div>
               ),
           },

@@ -1,0 +1,14 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: uca_cfc_connect_test
+      POSTGRES_USER: cfc_app
+      POSTGRES_PASSWORD: cfc_app_dev
+    ports:
+      - "127.0.0.1:55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cfc_app -d uca_cfc_connect_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 20

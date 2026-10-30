@@ -6,6 +6,7 @@ public final class JwtClaims {
     public static final String EMISOR = "uca-cfc-connect";
     public static final String USUARIO_ID = "uid";
     public static final String ROL = "rol";
+    public static final String VERSION_SESION = "sv";
 
     private JwtClaims() {
     }

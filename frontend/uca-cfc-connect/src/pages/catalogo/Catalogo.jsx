@@ -16,7 +16,7 @@ import { alertError, alertSuccess } from '../../utils/alerts'
 import { ROLES } from '../../utils/constants'
 import { getErrorMessage } from '../../utils/errorHandler'
 import { money, shortDate } from '../../utils/format'
-import { isStaff } from '../../utils/permissions'
+import { canManageCatalog } from '../../utils/permissions'
 
 const PER_PAGE = 9
 const TIPOS = [['TODOS', 'Todos'], ['CURSO', 'Cursos'], ['DIPLOMADO', 'Diplomados']]
@@ -94,10 +94,10 @@ function CatalogCard({ item, onOpen }) {
 
 export default function Catalogo() {
   const { role } = useAuth()
-  const staff = isStaff(role)
+  const canEdit = canManageCatalog(role)
   const load = useCallback(() => loadOffers(role === ROLES.CLIENTE), [role])
   const { data, loading, error, refetch } = useFetch(load)
-  const lookupsFn = useCallback(() => (staff ? loadLookups() : Promise.resolve(null)), [staff])
+  const lookupsFn = useCallback(() => (canEdit ? loadLookups() : Promise.resolve(null)), [canEdit])
   const lookups = useFetch(lookupsFn)
   const { search } = useLayoutSearch('Buscar curso, diplomado o código...')
 
@@ -152,7 +152,7 @@ export default function Catalogo() {
           <h1>Catálogo académico</h1>
           <p>Cursos empresariales, diplomados y talleres del centro{data ? ` — ${data.length} registrados` : ''}</p>
         </div>
-        {staff && (
+        {canEdit && (
           <div style={{ display: 'flex', gap: 10 }}>
             <button type="button" className="btn-outline" disabled={!formReady} onClick={() => setForm({ tipo: 'DIPLOMADO' })}>Nuevo diplomado</button>
             <button type="button" className="btn-primary" disabled={!formReady} onClick={() => setForm({ tipo: 'CURSO' })}>Nuevo curso</button>
@@ -167,7 +167,7 @@ export default function Catalogo() {
       </div>
 
       <ErrorMessage message={error} onRetry={refetch} />
-      {staff && lookups.error && <ErrorMessage message={`No se cargaron las listas del formulario: ${lookups.error}`} onRetry={lookups.refetch} />}
+      {canEdit && lookups.error && <ErrorMessage message={`No se cargaron las listas del formulario: ${lookups.error}`} onRetry={lookups.refetch} />}
       {loading && !data && <Loading />}
       {!loading && !error && filtered.length === 0 && <div className="panel"><EmptyState text="Ajusta los filtros o la búsqueda." /></div>}
       {visible.length > 0 && (
@@ -184,7 +184,7 @@ export default function Catalogo() {
           title={`${detail.codigo} · ${detail.nombre}`}
           onClose={() => setDetail(null)}
           footer={
-            staff && (
+            canEdit && (
               <>
                 <button type="button" className="btn-outline" onClick={() => toggleEstado(detail)}>{detail.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'}</button>
                 <button type="button" className="btn-primary" disabled={!formReady} onClick={() => setForm({ tipo: detail.tipo, item: detail })}>Editar</button>

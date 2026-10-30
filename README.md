@@ -1,14 +1,5 @@
 # UCA-CFC Connect
 
-API REST para digitalizar la operación del Centro de Formación Continua (CFC):
-cursos, diplomados, inscripciones, clientes, cotizaciones, alquileres,
-catering, agenda y pagos.
-
-Este repositorio contiene el backend estable, el frontend React + Vite y la
-documentación de la entrega. El frontend consume el contrato publicado por el
-backend y mantiene separada la configuración de la URL mediante
-`VITE_API_URL`.
-
 ## Tecnologías
 
 - Java 21.

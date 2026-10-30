@@ -85,6 +85,7 @@ public class InscripcionController {
     @ApiResponse(responseCode = "409", description = "La oferta alcanzó su cupo máximo o el participante ya está inscrito")
     @ApiResponse(responseCode = "422", description = "La oferta está inactiva o no se indicó curso ni diplomado")
     public ResponseEntity<InscripcionResponse> crear(@Valid @RequestBody InscripcionRequest request) {
+        usuarioActual.verificarCliente(request.clienteId());
         InscripcionResponse creada = inscripcionService.crear(request);
         return ResponseEntity.created(UbicacionRecurso.de(creada.id())).body(creada);
     }

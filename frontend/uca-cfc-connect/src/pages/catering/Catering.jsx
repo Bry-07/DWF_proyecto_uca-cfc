@@ -11,7 +11,7 @@ import { alertSuccess } from '../../utils/alerts'
 import { changeEstado } from '../../utils/estadoFlow'
 import { money, shortDate } from '../../utils/format'
 import { ENUMS, enumOptions, humanize } from '../../utils/labels'
-import { isStaff } from '../../utils/permissions'
+import { canManageCatalog, isStaff } from '../../utils/permissions'
 
 const servicioFields = [
   { name: 'nombre', label: 'Nombre', required: true, maxLength: 120 },
@@ -22,7 +22,7 @@ const servicioFields = [
   { name: 'descripcion', label: 'Descripción', type: 'textarea', maxLength: 500 },
 ]
 
-function Servicios({ staff }) {
+function Servicios({ canEdit }) {
   const list = usePagedList(serviciosCateringApi.list, {})
   const [form, setForm] = useState(null)
   const submit = async (body) => {
@@ -34,7 +34,7 @@ function Servicios({ staff }) {
   }
   return (
     <>
-      {staff && <div className="toolbar"><span className="spacer" /><button type="button" className="btn-primary" onClick={() => setForm({})}>Nuevo servicio</button></div>}
+      {canEdit && <div className="toolbar"><span className="spacer" /><button type="button" className="btn-primary" onClick={() => setForm({})}>Nuevo servicio</button></div>}
       <DataTable
         {...list}
         rows={list.items}
@@ -46,7 +46,7 @@ function Servicios({ staff }) {
           { header: 'Por persona', className: 'num', render: (r) => money(r.precioPorPersona) },
           { header: 'Mínimo', className: 'num', render: (r) => r.minimoPersonas },
           { header: 'Estado', render: (r) => <StatusBadge value={r.activo ? 'ACTIVO' : 'INACTIVO'} /> },
-          { header: '', render: (r) => staff && <button type="button" className="link-action" onClick={() => setForm({ item: r })}>Editar</button> },
+          { header: '', render: (r) => canEdit && <button type="button" className="link-action" onClick={() => setForm({ item: r })}>Editar</button> },
         ]}
       />
       {form && <FormModal title={form.item ? 'Editar servicio' : 'Nuevo servicio'} fields={servicioFields} initial={form.item} onSubmit={submit} onClose={() => setForm(null)} />}
@@ -128,7 +128,7 @@ export default function Catering() {
         <button type="button" className={`chip${tab === 'solicitudes' ? ' on' : ''}`} onClick={() => setTab('solicitudes')}>Solicitudes</button>
         <button type="button" className={`chip${tab === 'servicios' ? ' on' : ''}`} onClick={() => setTab('servicios')}>Servicios</button>
       </div>
-      {tab === 'solicitudes' ? <Solicitudes staff={staff} /> : <Servicios staff={staff} />}
+      {tab === 'solicitudes' ? <Solicitudes staff={staff} /> : <Servicios canEdit={canManageCatalog(role)} />}
     </div>
   )
 }

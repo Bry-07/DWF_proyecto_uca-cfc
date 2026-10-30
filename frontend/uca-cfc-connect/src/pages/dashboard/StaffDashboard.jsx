@@ -16,12 +16,20 @@ async function loadStaff() {
   const semana = todayRange(7)
   const [insc, cot, clientes, agenda, conflictos] = await Promise.all([
     inscripcionesApi.list({ estado: 'PENDIENTE', size: 1 }),
-    cotizacionesApi.list({ estado: 'PENDIENTE', size: 5 }),
+    loadCotizacionesAbiertas(),
     clientesApi.list({ size: 1 }),
     agendaApi.list({ fechaDesde: hoy.desde, fechaHasta: hoy.hasta, size: 50 }),
     agendaApi.conflictos({ fechaDesde: semana.desde, fechaHasta: semana.hasta }),
   ])
   return { insc, cot, clientes, agenda, conflictos }
+}
+
+async function loadCotizacionesAbiertas() {
+  const paginas = await Promise.all(['PENDIENTE', 'EN_PROCESO'].map((estado) => cotizacionesApi.list({ estado, size: 5 })))
+  return {
+    total: paginas.reduce((sum, pagina) => sum + pagina.total, 0),
+    items: paginas.flatMap((pagina) => pagina.items).sort((a, b) => b.id - a.id).slice(0, 5),
+  }
 }
 
 // Administración (con cifras financieras) y Recepción (solo operación).
@@ -37,7 +45,7 @@ export default function StaffDashboard({ canSeeFinance }) {
       <ErrorMessage message={error} onRetry={refetch} />
 
       <div className="grid cols-4" style={{ marginBottom: 24 }}>
-        <StatCard label="Cotizaciones pendientes" icon="cotizaciones" value={data?.cot.total} sub="Esperan revisión" loading={loading} />
+        <StatCard label="Cotizaciones por revisar" icon="cotizaciones" value={data?.cot.total} sub="Pendientes y en proceso" loading={loading} />
         <StatCard label="Inscripciones pendientes" icon="inscripciones" value={data?.insc.total} sub="Por confirmar" loading={loading} />
         <StatCard label="Clientes" icon="clientes" value={data?.clientes.total} sub="Registrados" loading={loading} />
         <StatCard label="Conflictos de agenda" icon="alert" value={data?.conflictos.length} sub="Próximos 7 días" loading={loading} />

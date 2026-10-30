@@ -9,6 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,6 +24,10 @@ import com.uca.cfc.entity.enums.MetodoPago;
  * la restricción {@code @SQLRestriction} declarada en la entidad.
  */
 public interface PagoRepository extends JpaRepository<Pago, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Pago p WHERE p.id = :id")
+    Optional<Pago> findForUpdateById(@Param("id") Long id);
 
     @EntityGraph(attributePaths = {"cliente", "comprobante"})
     Optional<Pago> findWithRelacionesById(Long id);

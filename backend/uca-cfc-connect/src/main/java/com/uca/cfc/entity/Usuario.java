@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 /**
  * Usuario que puede entrar al sistema.
@@ -18,6 +19,14 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "usuarios")
 public class Usuario extends AuditableEntity {
+
+    /** Cada cambio de la cuenta invalida los JWT emitidos con su revisión anterior. */
+    @Version
+    private long version;
+
+    public long getVersion() {
+        return version;
+    }
 
     @Column(nullable = false, length = 150)
     private String nombre;

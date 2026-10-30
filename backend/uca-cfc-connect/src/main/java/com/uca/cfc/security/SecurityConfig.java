@@ -35,6 +35,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.uca.cfc.repository.TokenRevocadoRepository;
+import com.uca.cfc.repository.UsuarioRepository;
 
 /**
  * Configuración de Spring Security: API sin sesión, autenticada con JWT y con la
@@ -110,7 +111,9 @@ public class SecurityConfig {
         rutas.requestMatchers(HttpMethod.DELETE, BASE + "/clientes/*").hasRole(ADMIN);
         rutas.requestMatchers(BASE + "/clientes", BASE + "/clientes/**").hasAnyRole(ADMIN, RECEPCIONISTA);
 
-        // ---- Inscripciones: las registra el personal; el cliente solo las consulta ----
+        // ---- Inscripciones: el cliente puede inscribirse únicamente a su propio nombre ----
+        rutas.requestMatchers(HttpMethod.POST, BASE + "/inscripciones")
+                .hasAnyRole(ADMIN, RECEPCIONISTA, CLIENTE);
         rutas.requestMatchers(HttpMethod.GET, BASE + "/inscripciones", BASE + "/inscripciones/**")
                 .hasAnyRole(ADMIN, RECEPCIONISTA, CONTABILIDAD, CLIENTE);
         rutas.requestMatchers(HttpMethod.DELETE, BASE + "/inscripciones/*").hasRole(ADMIN);
@@ -196,13 +199,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(TokenRevocadoRepository tokenRevocadoRepository) {
+    public JwtDecoder jwtDecoder(TokenRevocadoRepository tokenRevocadoRepository, UsuarioRepository usuarios) {
         NimbusJwtDecoder decodificador = NimbusJwtDecoder.withSecretKey(clave())
                 .macAlgorithm(MacAlgorithm.HS256)
                 .build();
         OAuth2TokenValidator<Jwt> validadores = new DelegatingOAuth2TokenValidator<>(
                 JwtValidators.createDefaultWithIssuer(JwtService.EMISOR),
-                new TokenRevocadoValidator(tokenRevocadoRepository));
+                new TokenRevocadoValidator(tokenRevocadoRepository),
+                new UsuarioVigenteValidator(usuarios));
         decodificador.setJwtValidator(validadores);
         return decodificador;
     }

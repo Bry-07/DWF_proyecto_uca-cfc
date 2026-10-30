@@ -26,6 +26,7 @@ import com.uca.cfc.dto.pago.AbonoPagoRequest;
 import com.uca.cfc.dto.pago.PagoRequest;
 import com.uca.cfc.entity.Cliente;
 import com.uca.cfc.entity.Pago;
+import com.uca.cfc.entity.Inscripcion;
 import com.uca.cfc.entity.enums.ConceptoPago;
 import com.uca.cfc.entity.enums.EstadoPago;
 import com.uca.cfc.entity.enums.MetodoPago;
@@ -66,14 +67,16 @@ class PagoServiceTest {
         Clock reloj = Clock.fixed(Instant.parse("2026-09-11T15:00:00Z"), ZoneId.of("America/El_Salvador"));
         service = new PagoService(pagoRepository, comprobanteRepository, inscripcionRepository,
                 cotizacionRepository, alquilerRepository, cateringRepository, clienteService,
-                new PagoMapper(new ClienteMapper()), reloj);
+                new PagoMapper(new ClienteMapper()), reloj, mock(NumeroComprobanteService.class));
 
         cliente = new Cliente();
         cliente.setId(CLIENTE_ID);
         cliente.setNombre("Laboratorios Vitalab");
 
         when(clienteService.buscar(CLIENTE_ID)).thenReturn(cliente);
-        when(inscripcionRepository.existsById(anyLong())).thenReturn(true);
+        Inscripcion inscripcion = new Inscripcion();
+        inscripcion.setCliente(cliente);
+        when(inscripcionRepository.findById(anyLong())).thenReturn(Optional.of(inscripcion));
         when(comprobanteRepository.existsByPagoId(anyLong())).thenReturn(false);
         when(pagoRepository.save(any(Pago.class))).thenAnswer(invocacion -> {
             Pago guardado = invocacion.getArgument(0);
@@ -100,6 +103,7 @@ class PagoServiceTest {
         pago.setMetodo(MetodoPago.TRANSFERENCIA);
         pago.setEstado(estado);
         when(pagoRepository.findWithRelacionesById(PAGO_ID)).thenReturn(Optional.of(pago));
+        when(pagoRepository.findForUpdateById(PAGO_ID)).thenReturn(Optional.of(pago));
         return pago;
     }
 
@@ -144,7 +148,7 @@ class PagoServiceTest {
     @Test
     @DisplayName("falla cuando el registro referenciado no existe")
     void referenciaInexistente() {
-        when(inscripcionRepository.existsById(anyLong())).thenReturn(false);
+        when(inscripcionRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
                 () -> service.crear(solicitud(new BigDecimal("185.00"), null)));
@@ -268,5 +272,37 @@ class PagoServiceTest {
         when(comprobanteRepository.existsByPagoId(PAGO_ID)).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> service.eliminar(PAGO_ID));
+    }
+
+    @Test
+    void rechazaDocumentoDeOtroCliente() {
+        Cliente otro = new Cliente();
+        otro.setId(99L);
+        Inscripcion inscripcion = new Inscripcion();
+        inscripcion.setCliente(otro);
+        when(inscripcionRepository.findById(5L)).thenReturn(Optional.of(inscripcion));
+
+        assertThrows(BusinessException.class,
+                () -> service.crear(solicitud(new BigDecimal("100"), BigDecimal.TEN)));
+        verify(pagoRepository, never()).save(any(Pago.class));
+    }
+
+    @Test
+    void noPermiteParcialSinDinero() {
+        pagoExistente("100", "0", EstadoPago.PENDIENTE);
+        assertThrows(BusinessException.class, () -> service.cambiarEstado(PAGO_ID, EstadoPago.PARCIAL));
+    }
+
+    @Test
+    void noInventaDineroAlMarcarPagado() {
+        Pago pago = pagoExistente("100", "20", EstadoPago.PARCIAL);
+        assertThrows(BusinessException.class, () -> service.cambiarEstado(PAGO_ID, EstadoPago.PAGADO));
+        assertEquals(new BigDecimal("20"), pago.getMontoPagado());
+    }
+
+    @Test
+    void noValidaEstadoHistoricoParcialSinDinero() {
+        pagoExistente("100", "0", EstadoPago.PARCIAL);
+        assertThrows(BusinessException.class, () -> service.validar(PAGO_ID, "contabilidad"));
     }
 }
